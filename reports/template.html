@@ -1,0 +1,1365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Penetration Test Report</title>
+<style>
+
+/* =============================================
+   FONTS & RESET
+   ============================================= */
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:wght@300;400;500;600;700;800&family=Barlow+Condensed:wght@600;700;800&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+    --red:        #e53935;
+    --red-dark:   #8b0000;
+    --red-mid:    #c62828;
+    --orange:     #f57c00;
+    --yellow:     #f9a825;
+    --green:      #2e7d32;
+    --green-lt:   #43a047;
+    --blue:       #1565c0;
+    --blue-lt:    #1976d2;
+    --ink:        #0d0d0d;
+    --ink-soft:   #2a2a2a;
+    --ink-mute:   #555;
+    --border:     #e0e0e0;
+    --bg:         #f7f8fa;
+    --white:      #ffffff;
+    --mono:       'Share Tech Mono', monospace;
+    --sans:       'Barlow', sans-serif;
+    --cond:       'Barlow Condensed', sans-serif;
+}
+
+body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--ink);
+    font-size: 11.5px;
+    line-height: 1.6;
+}
+
+/* =============================================
+   PAGE BREAK UTILITY
+   ============================================= */
+.page-break { page-break-after: always; }
+
+/* =============================================
+   COVER PAGE
+   ============================================= */
+.cover {
+    background: var(--ink);
+    color: var(--white);
+    min-height: 297mm;
+    padding: 0;
+    position: relative;
+    overflow: hidden;
+    page-break-after: always;
+}
+
+.cover-accent {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 8px;
+    background: linear-gradient(90deg, var(--red-dark), var(--red), var(--orange));
+}
+
+.cover-sidebar {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 6px;
+    background: linear-gradient(180deg, var(--red-dark), var(--red-mid), var(--red));
+}
+
+.cover-body {
+    padding: 60px 60px 60px 72px;
+    display: flex;
+    flex-direction: column;
+    min-height: 297mm;
+}
+
+.cover-tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--red);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 60px;
+}
+
+.cover-title {
+    font-family: var(--cond);
+    font-size: 58px;
+    font-weight: 800;
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: -1px;
+    color: var(--white);
+    margin-bottom: 8px;
+}
+
+.cover-subtitle {
+    font-family: var(--cond);
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--red);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 48px;
+}
+
+.cover-divider {
+    width: 80px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--red), transparent);
+    margin-bottom: 40px;
+}
+
+.cover-meta {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 10px 0;
+    margin-bottom: 60px;
+}
+
+.cover-meta-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    padding-top: 2px;
+}
+
+.cover-meta-value {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--white);
+    word-break: break-all;
+}
+
+.cover-verdict {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    border-top: 1px solid #333;
+    padding-top: 32px;
+}
+
+.verdict-badge {
+    font-family: var(--cond);
+    font-size: 22px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    padding: 12px 28px;
+    border-radius: 4px;
+}
+
+.verdict-badge.approved { background: var(--green); color: #fff; }
+.verdict-badge.rejected { background: var(--red);   color: #fff; }
+
+.verdict-score {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: #888;
+    line-height: 1.8;
+}
+
+.verdict-score span {
+    display: block;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--white);
+    font-family: var(--cond);
+}
+
+/* =============================================
+   SECTION WRAPPER
+   ============================================= */
+.report-body {
+    padding: 32px 40px;
+}
+
+/* =============================================
+   SECTION HEADER
+   ============================================= */
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 36px 0 18px;
+    page-break-after: avoid;
+}
+
+.section-num {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--red);
+    background: #fff0f0;
+    border: 1px solid #ffd0d0;
+    padding: 3px 8px;
+    border-radius: 3px;
+    letter-spacing: 1px;
+    white-space: nowrap;
+}
+
+.section-title {
+    font-family: var(--cond);
+    font-size: 20px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--ink);
+    border-bottom: 2px solid var(--red);
+    padding-bottom: 4px;
+    flex: 1;
+}
+
+/* =============================================
+   EXECUTIVE SUMMARY CARDS
+   ============================================= */
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 24px;
+}
+
+.summary-card {
+    background: var(--white);
+    border-radius: 8px;
+    padding: 18px 16px;
+    border-top: 4px solid var(--border);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    text-align: center;
+}
+
+.summary-card.card-pass   { border-top-color: var(--blue); }
+.summary-card.card-warn   { border-top-color: var(--orange); }
+.summary-card.card-fail   { border-top-color: var(--red); }
+.summary-card.card-score  { border-top-color: #6a1b9a; }
+
+.summary-card .card-num {
+    font-family: var(--cond);
+    font-size: 38px;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 4px;
+}
+
+.card-pass  .card-num { color: var(--blue); }
+.card-warn  .card-num { color: var(--orange); }
+.card-fail  .card-num { color: var(--red); }
+.card-score .card-num { color: #6a1b9a; }
+
+.summary-card .card-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--ink-mute);
+    font-weight: 600;
+}
+
+/* =============================================
+   SCORE BAR
+   ============================================= */
+.score-section {
+    background: var(--white);
+    border-radius: 8px;
+    padding: 20px 22px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+
+.score-label-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 10px;
+}
+
+.score-label-row .slabel {
+    font-family: var(--cond);
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--ink-soft);
+}
+
+.score-label-row .svalue {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--ink-mute);
+}
+
+.score-track {
+    background: #eee;
+    border-radius: 6px;
+    height: 14px;
+    overflow: hidden;
+    position: relative;
+}
+
+.score-fill {
+    height: 100%;
+    border-radius: 6px;
+    background: linear-gradient(90deg, var(--red-dark), var(--red), var(--orange));
+    position: relative;
+}
+
+.risk-pill {
+    display: inline-block;
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 12px;
+}
+
+.risk-pill.critical { background: #880e4f; color: #fff; }
+.risk-pill.high     { background: var(--red); color: #fff; }
+.risk-pill.moderate { background: var(--orange); color: #fff; }
+.risk-pill.low      { background: var(--green); color: #fff; }
+
+/* =============================================
+   RECOMMENDATIONS BOX
+   ============================================= */
+.rec-box {
+    background: var(--white);
+    border-radius: 8px;
+    padding: 18px 22px;
+    border-left: 4px solid var(--blue);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    margin-bottom: 20px;
+}
+
+.rec-box h4 {
+    font-family: var(--cond);
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--blue);
+    margin-bottom: 10px;
+}
+
+.rec-box ol {
+    padding-left: 18px;
+}
+
+.rec-box ol li {
+    margin-bottom: 6px;
+    color: var(--ink-soft);
+    font-size: 11.5px;
+    line-height: 1.6;
+}
+
+/* =============================================
+   FINDING CARD  (main detail block)
+   ============================================= */
+.finding-group-title {
+    font-family: var(--cond);
+    font-size: 15px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--ink-soft);
+    background: #f0f2f5;
+    border-left: 4px solid var(--red-mid);
+    padding: 8px 14px;
+    margin: 20px 0 10px;
+    page-break-after: avoid;
+}
+
+.finding-card {
+    background: var(--white);
+    border-radius: 8px;
+    margin-bottom: 18px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+    overflow: hidden;
+    page-break-inside: avoid;
+}
+
+.finding-card-header {
+    display: flex;
+    align-items: stretch;
+    min-height: 48px;
+}
+
+.finding-severity-bar {
+    width: 6px;
+    flex-shrink: 0;
+}
+
+.sev-low      { background: var(--blue-lt); }
+.sev-medium   { background: var(--orange); }
+.sev-high     { background: var(--red); }
+.sev-critical { background: #880e4f; }
+
+.finding-header-content {
+    flex: 1;
+    padding: 12px 16px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.finding-title {
+    font-family: var(--cond);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.3;
+}
+
+.finding-meta-chips {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.chip {
+    font-family: var(--mono);
+    font-size: 9.5px;
+    padding: 3px 9px;
+    border-radius: 3px;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.chip-tool    { background: #e8eaf6; color: #283593; }
+.chip-sev-low      { background: #e3f2fd; color: var(--blue); }
+.chip-sev-medium   { background: #fff3e0; color: #e65100; }
+.chip-sev-high     { background: #ffebee; color: var(--red); }
+.chip-sev-critical { background: #fce4ec; color: #880e4f; }
+.chip-pass    { background: #e8f5e9; color: var(--green); }
+.chip-warn    { background: #fff8e1; color: #f57f17; }
+.chip-fail    { background: #ffebee; color: var(--red-mid); }
+
+/* Finding body grid */
+.finding-body {
+    padding: 14px 16px 16px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 20px;
+}
+
+.finding-body.full-width {
+    grid-template-columns: 1fr;
+}
+
+.finding-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.finding-field.span2 {
+    grid-column: span 2;
+}
+
+.field-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #999;
+    font-weight: 600;
+}
+
+.field-value {
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    line-height: 1.6;
+}
+
+.field-value.mono {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    background: #f5f5f5;
+    padding: 6px 10px;
+    border-radius: 4px;
+    word-break: break-all;
+    color: #333;
+}
+
+.field-value.url {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--blue);
+    word-break: break-all;
+}
+
+/* Severity color text */
+.text-low      { color: var(--blue-lt);  font-weight: 600; }
+.text-medium   { color: var(--orange);   font-weight: 600; }
+.text-high     { color: var(--red);      font-weight: 600; }
+.text-critical { color: #880e4f;         font-weight: 700; }
+
+/* CVSS bar */
+.cvss-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 2px;
+}
+
+.cvss-score {
+    font-family: var(--cond);
+    font-size: 20px;
+    font-weight: 800;
+    min-width: 36px;
+}
+
+.cvss-track {
+    flex: 1;
+    height: 8px;
+    background: #eee;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.cvss-fill {
+    height: 100%;
+    border-radius: 4px;
+}
+
+/* Attack vector tags */
+.av-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 2px;
+}
+
+.av-tag {
+    font-family: var(--mono);
+    font-size: 9px;
+    padding: 2px 7px;
+    border-radius: 3px;
+    background: #f5f5f5;
+    color: var(--ink-mute);
+    border: 1px solid #e0e0e0;
+}
+
+/* Remediation block */
+.remediation-block {
+    background: #f0f9f0;
+    border-left: 3px solid var(--green-lt);
+    border-radius: 4px;
+    padding: 10px 14px;
+    margin-top: 2px;
+}
+
+.remediation-block p {
+    font-size: 11px;
+    color: #2e4a2e;
+    line-height: 1.7;
+}
+
+/* Evidence block */
+.evidence-block {
+    background: #1a1a2e;
+    border-radius: 4px;
+    padding: 10px 14px;
+    margin-top: 2px;
+}
+
+.evidence-block p {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: #a8d8a8;
+    line-height: 1.8;
+    word-break: break-all;
+}
+
+/* References */
+.ref-list {
+    list-style: none;
+    margin-top: 2px;
+}
+
+.ref-list li {
+    font-size: 10.5px;
+    color: var(--blue);
+    padding: 1px 0;
+    font-family: var(--mono);
+}
+
+.ref-list li::before {
+    content: "→ ";
+    color: var(--red);
+}
+
+/* =============================================
+   COMPLIANCE TABLE
+   ============================================= */
+.compliance-table-wrap {
+    background: var(--white);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    margin-bottom: 20px;
+}
+
+.compliance-table-wrap h4 {
+    font-family: var(--cond);
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 12px 16px;
+    background: var(--ink);
+    color: var(--white);
+}
+
+table.ctable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+}
+
+table.ctable thead th {
+    background: #f0f2f5;
+    color: var(--ink-soft);
+    font-weight: 700;
+    padding: 9px 14px;
+    text-align: left;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 2px solid var(--border);
+}
+
+table.ctable tbody td {
+    padding: 9px 14px;
+    border-bottom: 1px solid #f0f0f0;
+    vertical-align: top;
+    color: var(--ink-soft);
+}
+
+table.ctable tbody tr:last-child td { border-bottom: none; }
+table.ctable tbody tr:hover td { background: #fafafa; }
+
+.status-badge {
+    font-size: 9.5px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+.status-pass     { background: #e8f5e9; color: var(--green); }
+.status-partial  { background: #fff3e0; color: var(--orange); }
+.status-fail     { background: #ffebee; color: var(--red); }
+.status-na       { background: #f5f5f5; color: #999; }
+
+/* =============================================
+   SCORING TABLE
+   ============================================= */
+.score-table-wrap {
+    background: var(--white);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    margin-bottom: 20px;
+}
+
+table.stable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+}
+
+table.stable thead th {
+    background: var(--red-dark);
+    color: var(--white);
+    font-weight: 700;
+    padding: 10px 14px;
+    text-align: left;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+table.stable tbody td {
+    padding: 9px 14px;
+    border-bottom: 1px solid #f0f0f0;
+    vertical-align: middle;
+}
+
+table.stable tbody tr:last-child td { border-bottom: none; }
+
+.mini-bar-wrap {
+    background: #eee;
+    border-radius: 4px;
+    height: 8px;
+    width: 120px;
+    overflow: hidden;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.mini-bar {
+    height: 100%;
+    border-radius: 4px;
+}
+
+.bar-high   { background: var(--green); }
+.bar-mid    { background: var(--orange); }
+.bar-low    { background: var(--red); }
+
+/* =============================================
+   CONDITIONS / GO-LIVE BOX
+   ============================================= */
+.conditions-box {
+    background: #fff8e1;
+    border: 1px solid #ffe082;
+    border-left: 5px solid var(--orange);
+    border-radius: 8px;
+    padding: 18px 22px;
+    margin-bottom: 20px;
+}
+
+.conditions-box h4 {
+    font-family: var(--cond);
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #bf360c;
+    margin-bottom: 10px;
+}
+
+.conditions-box ol {
+    padding-left: 20px;
+}
+
+.conditions-box ol li {
+    margin-bottom: 6px;
+    color: #4e342e;
+    font-size: 11.5px;
+    line-height: 1.6;
+}
+
+/* =============================================
+   FOOTER
+   ============================================= */
+.report-footer {
+    margin-top: 40px;
+    border-top: 2px solid var(--border);
+    padding: 16px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--white);
+}
+
+.footer-left {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: #aaa;
+    line-height: 1.7;
+}
+
+.footer-right {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: #aaa;
+    text-align: right;
+    line-height: 1.7;
+}
+
+.confidential-stamp {
+    font-family: var(--cond);
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    color: var(--red);
+    border: 2px solid var(--red);
+    padding: 3px 10px;
+    border-radius: 3px;
+    opacity: 0.6;
+}
+
+/* =============================================
+   EMPTY STATE
+   ============================================= */
+.empty-state {
+    text-align: center;
+    padding: 24px;
+    color: #bbb;
+    font-style: italic;
+    font-size: 11px;
+}
+
+</style>
+</head>
+<body>
+
+<!-- =============================================
+     COVER PAGE
+     ============================================= -->
+<div class="cover">
+    <div class="cover-accent"></div>
+    <div class="cover-sidebar"></div>
+
+    <div class="cover-body">
+        <div class="cover-tag">// Confidential Security Document</div>
+
+        <div class="cover-title">Penetration</div>
+        <div class="cover-title" style="color: var(--red);">Test Report</div>
+        <div class="cover-subtitle">Automated Vulnerability Assessment</div>
+
+        <div class="cover-divider"></div>
+
+        <div class="cover-meta">
+            <div class="cover-meta-label">Target</div>
+            <div class="cover-meta-value">{{ target }}</div>
+
+            <div class="cover-meta-label">Scan Date</div>
+            <div class="cover-meta-value">{{ date }}</div>
+
+            <div class="cover-meta-label">Report ID</div>
+            <div class="cover-meta-value" style="font-family: 'Share Tech Mono', monospace; color: #888; font-size: 11px;">
+                RPT-{{ date | replace(' ', '') | replace(':', '') | replace('-', '') | truncate(14, true, '') }}
+            </div>
+
+            <div class="cover-meta-label">Classification</div>
+            <div class="cover-meta-value" style="color: var(--red);">CONFIDENTIAL</div>
+
+            <div class="cover-meta-label">Total Findings</div>
+            <div class="cover-meta-value">{{ pass_count + warn_count + fail_count }}</div>
+
+            <div class="cover-meta-label">Critical / High</div>
+            <div class="cover-meta-value" style="color: var(--red);">{{ fail_count }}</div>
+
+            <div class="cover-meta-label">Overall Risk</div>
+            <div class="cover-meta-value">{{ risk }}</div>
+        </div>
+
+        <div class="cover-verdict">
+            <div class="verdict-badge {{ 'approved' if decision == 'Approved' else 'rejected' }}">
+                {{ decision }}
+            </div>
+            <div class="verdict-score">
+                Security Score
+                <span>{{ score_pct }}%</span>
+                {{ score }} / {{ max_score }} points
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- =============================================
+     REPORT BODY
+     ============================================= -->
+<div class="report-body">
+
+<!-- ─────────────────────────────────────────
+     SECTION 1 — EXECUTIVE SUMMARY
+     ───────────────────────────────────────── -->
+<div class="section-header">
+    <span class="section-num">SECTION 01</span>
+    <div class="section-title">Executive Summary</div>
+</div>
+
+<div class="summary-grid">
+    <div class="summary-card card-pass">
+        <div class="card-num">{{ pass_count }}</div>
+        <div class="card-label">✔ Passed</div>
+    </div>
+    <div class="summary-card card-warn">
+        <div class="card-num">{{ warn_count }}</div>
+        <div class="card-label">⚠ Warnings</div>
+    </div>
+    <div class="summary-card card-fail">
+        <div class="card-num">{{ fail_count }}</div>
+        <div class="card-label">✖ Failed</div>
+    </div>
+    <div class="summary-card card-score">
+        <div class="card-num">{{ score_pct }}%</div>
+        <div class="card-label">Security Score</div>
+    </div>
+</div>
+
+<div class="score-section">
+    <div class="score-label-row">
+        <span class="slabel">Overall Security Posture</span>
+        <span class="svalue">{{ score }} / {{ max_score }} pts</span>
+    </div>
+    <div class="score-track">
+        <div class="score-fill" style="width: {{ [score_pct, 100]|min }}%;"></div>
+    </div>
+    {% if fail_count > 5 %}
+        <span class="risk-pill critical">{{ risk }}</span>
+    {% elif fail_count > 2 %}
+        <span class="risk-pill high">{{ risk }}</span>
+    {% elif warn_count > 5 %}
+        <span class="risk-pill moderate">{{ risk }}</span>
+    {% else %}
+        <span class="risk-pill low">{{ risk }}</span>
+    {% endif %}
+</div>
+
+<div class="rec-box">
+    <h4>🔍 Key Recommendations</h4>
+    <ol>
+        {% for r in recommendations %}
+        <li>{{ r }}</li>
+        {% endfor %}
+    </ol>
+</div>
+
+<!-- ─────────────────────────────────────────
+     SECTION 2 — DETAILED FINDINGS
+     ───────────────────────────────────────── -->
+<div class="section-header" style="margin-top: 40px;">
+    <span class="section-num">SECTION 02</span>
+    <div class="section-title">Detailed Findings</div>
+</div>
+
+{% set sev_order = ['High', 'Critical', 'Medium', 'Low'] %}
+
+{% for section_name, items in grouped_findings.items() %}
+
+    {% if items %}
+    <div class="finding-group-title">{{ section_name }} &nbsp;·&nbsp; {{ items | length }} finding(s)</div>
+
+    {% for f in items %}
+        {% set sev = (f.severity or 'Medium') | capitalize %}
+        {% set sev_lower = sev | lower %}
+
+        <div class="finding-card">
+
+            <!-- Card Header -->
+            <div class="finding-card-header">
+                <div class="finding-severity-bar sev-{{ sev_lower }}"></div>
+                <div class="finding-header-content">
+                    <div class="finding-title">{{ f.title or 'Unnamed Finding' }}</div>
+                    <div class="finding-meta-chips">
+                        <span class="chip chip-tool">{{ f.tool or 'N/A' }}</span>
+                        {% if sev == 'Low' %}
+                            <span class="chip chip-sev-low">Low</span>
+                            <span class="chip chip-pass">PASS</span>
+                        {% elif sev == 'Medium' %}
+                            <span class="chip chip-sev-medium">Medium</span>
+                            <span class="chip chip-warn">WARN</span>
+                        {% elif sev == 'Critical' %}
+                            <span class="chip chip-sev-critical">Critical</span>
+                            <span class="chip chip-fail">FAIL</span>
+                        {% else %}
+                            <span class="chip chip-sev-high">High</span>
+                            <span class="chip chip-fail">FAIL</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card Body -->
+            <div class="finding-body">
+
+                <!-- Affected URL -->
+                <div class="finding-field span2">
+                    <span class="field-label">Affected URL / Host</span>
+                    <span class="field-value url">{{ f.url or f.get('host', target) or target }}</span>
+                </div>
+
+                <!-- Description -->
+                <div class="finding-field span2">
+                    <span class="field-label">Vulnerability Description</span>
+                    <div class="field-value">
+                        {{ f.description or 'No description provided.' }}
+                    </div>
+                </div>
+
+                <!-- Severity & CVSS -->
+                <div class="finding-field">
+                    <span class="field-label">Severity Level</span>
+                    <div class="field-value">
+                        {% if sev == 'Critical' %}
+                            <span class="text-critical">● Critical</span>
+                        {% elif sev == 'High' %}
+                            <span class="text-high">● High</span>
+                        {% elif sev == 'Medium' %}
+                            <span class="text-medium">● Medium</span>
+                        {% else %}
+                            <span class="text-low">● Low / Informational</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- CVSS Score (derived from severity) -->
+                <div class="finding-field">
+                    <span class="field-label">CVSS Score (Estimated)</span>
+                    <div class="field-value">
+                        {% if sev == 'Critical' %}
+                            {% set cvss = '9.0' %}{% set cvss_pct = 90 %}{% set cvss_color = '#880e4f' %}
+                        {% elif sev == 'High' %}
+                            {% set cvss = '7.5' %}{% set cvss_pct = 75 %}{% set cvss_color = '#c62828' %}
+                        {% elif sev == 'Medium' %}
+                            {% set cvss = '5.0' %}{% set cvss_pct = 50 %}{% set cvss_color = '#f57c00' %}
+                        {% else %}
+                            {% set cvss = '2.5' %}{% set cvss_pct = 25 %}{% set cvss_color = '#1565c0' %}
+                        {% endif %}
+                        <div class="cvss-row">
+                            <span class="cvss-score" style="color: {{ cvss_color }};">{{ cvss }}</span>
+                            <div class="cvss-track">
+                                <div class="cvss-fill" style="width: {{ cvss_pct }}%; background: {{ cvss_color }};"></div>
+                            </div>
+                            <span style="font-family: var(--mono); font-size: 9px; color: #aaa;">/ 10.0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Attack Vector -->
+                <div class="finding-field">
+                    <span class="field-label">Attack Vector</span>
+                    <div class="field-value">
+                        <div class="av-tags">
+                            {% if 'Header' in (f.title or '') or 'CSP' in (f.title or '') or 'HSTS' in (f.title or '') %}
+                                <span class="av-tag">Network</span><span class="av-tag">HTTP</span><span class="av-tag">Passive</span>
+                            {% elif 'JWT' in (f.title or '') or 'Auth' in (f.title or '') %}
+                                <span class="av-tag">Network</span><span class="av-tag">Authentication</span><span class="av-tag">Active</span>
+                            {% elif 'XSS' in (f.title or '') or 'Inject' in (f.title or '') %}
+                                <span class="av-tag">Network</span><span class="av-tag">Web App</span><span class="av-tag">Active</span>
+                            {% elif 'Port' in (f.title or '') or 'Service' in (f.title or '') %}
+                                <span class="av-tag">Network</span><span class="av-tag">Infrastructure</span><span class="av-tag">Active</span>
+                            {% elif 'DNS' in (f.title or '') %}
+                                <span class="av-tag">Network</span><span class="av-tag">DNS</span><span class="av-tag">Passive</span>
+                            {% else %}
+                                <span class="av-tag">Network</span><span class="av-tag">Web App</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Impact -->
+                <div class="finding-field">
+                    <span class="field-label">Business Impact</span>
+                    <div class="field-value">
+                        {% if sev == 'Critical' or sev == 'High' %}
+                            Data breach, unauthorized access, service disruption, regulatory penalties.
+                        {% elif sev == 'Medium' %}
+                            Potential data leakage, increased attack surface, compliance violation.
+                        {% else %}
+                            Minimal impact. Informational. Improves security hygiene if remediated.
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Remediation -->
+                <div class="finding-field span2">
+                    <span class="field-label">Remediation Guidance</span>
+                    <div class="remediation-block">
+                        <p>
+                        {% if 'HSTS' in (f.title or '') or 'Strict-Transport' in (f.title or '') %}
+                            Add the <strong>Strict-Transport-Security</strong> HTTP response header with a minimum max-age of 31536000 (1 year). Example: <code>Strict-Transport-Security: max-age=31536000; includeSubDomains; preload</code>
+                        {% elif 'CSP' in (f.title or '') or 'Content Security Policy' in (f.title or '') %}
+                            Implement a <strong>Content-Security-Policy</strong> header. Start with a strict policy and whitelist only trusted sources. Use <code>Content-Security-Policy: default-src 'self'</code> as a baseline and expand as needed.
+                        {% elif 'JWT' in (f.title or '') %}
+                            Reject JWT tokens with <strong>alg=none</strong> at the server. Enforce a whitelist of accepted algorithms (e.g., RS256, ES256). Never trust the algorithm header from untrusted input.
+                        {% elif 'Auth' in (f.title or '') or 'Unauthorized' in (f.title or '') %}
+                            Enforce authentication and authorization checks on all admin and sensitive endpoints. Use middleware-level protection. Apply the principle of least privilege.
+                        {% elif 'Version' in (f.title or '') or 'Server' in (f.title or '') %}
+                            Remove or suppress the <strong>Server</strong> and <strong>X-Powered-By</strong> HTTP response headers to prevent version fingerprinting.
+                        {% elif 'Cache' in (f.title or '') %}
+                            Add <strong>Cache-Control: no-store, no-cache, must-revalidate</strong> headers on sensitive pages. Ensure private data is not cached by proxies.
+                        {% elif 'Timestamp' in (f.title or '') %}
+                            Remove Unix timestamps from API responses and HTML output. These can assist attackers in reconnaissance and correlation attacks.
+                        {% elif 'Cross-Domain' in (f.title or '') or 'CORS' in (f.title or '') %}
+                            Restrict <strong>Access-Control-Allow-Origin</strong> to specific trusted domains. Never use wildcard (*) on authenticated endpoints.
+                        {% elif 'XSS' in (f.title or '') %}
+                            Encode all user-supplied output. Use a CSP header. Sanitize inputs server-side using an allow-list approach.
+                        {% elif 'SQL' in (f.title or '') or 'Inject' in (f.title or '') %}
+                            Use parameterized queries or prepared statements. Never concatenate user input into SQL queries. Apply input validation.
+                        {% else %}
+                            Review the finding details and apply the vendor-recommended patch or configuration change. Validate the fix in a staging environment before deploying to production.
+                        {% endif %}
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Evidence -->
+                <div class="finding-field span2">
+                    <span class="field-label">Evidence / Request Trace</span>
+                    <div class="evidence-block">
+                        <p>
+                        {% if f.url %}
+                            GET {{ f.url }} HTTP/1.1<br>
+                            Host: {{ target }}<br>
+                            User-Agent: PenTestBot/1.0<br>
+                            ──────────────────────────────────────────<br>
+                            [Tool: {{ f.tool or 'Scanner' }}] Finding confirmed at above endpoint.<br>
+                            Severity: {{ sev }} &nbsp;|&nbsp; Result: {{ 'PASS' if sev == 'Low' else ('WARN' if sev == 'Medium' else 'FAIL') }}
+                        {% else %}
+                            [No request trace available for this finding]
+                        {% endif %}
+                        </p>
+                    </div>
+                </div>
+
+                <!-- References -->
+                <div class="finding-field span2">
+                    <span class="field-label">References</span>
+                    <ul class="ref-list">
+                        {% if 'HSTS' in (f.title or '') or 'Strict-Transport' in (f.title or '') %}
+                            <li>https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security</li>
+                            <li>https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Strict_Transport_Security_Cheat_Sheet.html</li>
+                        {% elif 'CSP' in (f.title or '') %}
+                            <li>https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP</li>
+                            <li>https://cheatsheetseries.owasp.org/cheatsheets/Content_Security_Policy_Cheat_Sheet.html</li>
+                        {% elif 'JWT' in (f.title or '') %}
+                            <li>https://cheatsheetseries.owasp.org/cheatsheets/JSON_Web_Token_for_Java_Cheat_Sheet.html</li>
+                            <li>https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2015-9235</li>
+                        {% elif 'XSS' in (f.title or '') %}
+                            <li>https://owasp.org/www-community/attacks/xss/</li>
+                            <li>https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html</li>
+                        {% elif 'SQL' in (f.title or '') or 'Inject' in (f.title or '') %}
+                            <li>https://owasp.org/www-community/attacks/SQL_Injection</li>
+                            <li>https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html</li>
+                        {% else %}
+                            <li>https://owasp.org/www-project-top-ten/</li>
+                            <li>https://nvd.nist.gov/</li>
+                        {% endif %}
+                    </ul>
+                </div>
+
+            </div><!-- /finding-body -->
+        </div><!-- /finding-card -->
+
+    {% endfor %}
+    {% else %}
+        {# skip empty groups silently #}
+    {% endif %}
+{% endfor %}
+
+<!-- ─────────────────────────────────────────
+     SECTION 3 — COMPLIANCE MAPPING
+     ───────────────────────────────────────── -->
+<div class="section-header" style="margin-top: 40px;">
+    <span class="section-num">SECTION 03</span>
+    <div class="section-title">Compliance Mapping</div>
+</div>
+
+<!-- PCI DSS -->
+<div class="compliance-table-wrap">
+    <h4>PCI DSS v4.0</h4>
+    <table class="ctable">
+        <thead>
+            <tr>
+                <th style="width:22%">Requirement</th>
+                <th style="width:14%">Status</th>
+                <th>Finding Reference</th>
+                <th>Evidence / Notes</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Req 6.3</strong> — Protect web-facing apps</td>
+                <td><span class="status-badge {{ 'status-fail' if fail_count > 0 else 'status-pass' }}">{{ 'Non-Compliant' if fail_count > 0 else 'Compliant' }}</span></td>
+                <td>High/Critical findings in Section 02</td>
+                <td>{{ fail_count }} failed control(s) identified</td>
+            </tr>
+            <tr>
+                <td><strong>Req 6.4</strong> — Public-facing web apps</td>
+                <td><span class="status-badge {{ 'status-partial' if warn_count > 0 else 'status-pass' }}">{{ 'Partial' if warn_count > 0 else 'Compliant' }}</span></td>
+                <td>Medium findings in Section 02</td>
+                <td>{{ warn_count }} warning(s) require attention</td>
+            </tr>
+            <tr>
+                <td><strong>Req 8.2</strong> — User authentication</td>
+                <td><span class="status-badge status-partial">Partial</span></td>
+                <td>Auth / JWT findings</td>
+                <td>Authentication tests performed</td>
+            </tr>
+            <tr>
+                <td><strong>Req 10.2</strong> — Audit log events</td>
+                <td><span class="status-badge status-na">N/A</span></td>
+                <td>—</td>
+                <td>Outside automated scan scope</td>
+            </tr>
+            {% if compliance %}
+            {% for c in compliance %}
+            <tr>
+                <td>{{ c.req }}</td>
+                <td><span class="status-badge">{{ c.status }}</span></td>
+                <td>—</td>
+                <td>{{ c.evidence }}</td>
+            </tr>
+            {% endfor %}
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+
+<!-- OWASP Top 10 -->
+<div class="compliance-table-wrap">
+    <h4>OWASP Top 10 — 2021</h4>
+    <table class="ctable">
+        <thead>
+            <tr>
+                <th style="width:22%">Category</th>
+                <th style="width:14%">Status</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>A01</strong> — Broken Access Control</td>
+                <td><span class="status-badge {{ 'status-fail' if fail_count > 0 else 'status-pass' }}">{{ 'At Risk' if fail_count > 0 else 'Pass' }}</span></td>
+                <td>Unauthorized endpoint access tested</td>
+            </tr>
+            <tr>
+                <td><strong>A02</strong> — Cryptographic Failures</td>
+                <td><span class="status-badge {{ 'status-partial' if warn_count > 0 else 'status-pass' }}">{{ 'Review' if warn_count > 0 else 'Pass' }}</span></td>
+                <td>TLS / HSTS header checks performed</td>
+            </tr>
+            <tr>
+                <td><strong>A03</strong> — Injection</td>
+                <td><span class="status-badge status-partial">Review</span></td>
+                <td>Active scan performed via ZAP / Nuclei</td>
+            </tr>
+            <tr>
+                <td><strong>A05</strong> — Security Misconfiguration</td>
+                <td><span class="status-badge {{ 'status-fail' if fail_count > 0 else 'status-partial' }}">{{ 'At Risk' if fail_count > 0 else 'Review' }}</span></td>
+                <td>Headers, CSP, version disclosure checked</td>
+            </tr>
+            <tr>
+                <td><strong>A07</strong> — Auth Failures</td>
+                <td><span class="status-badge {{ 'status-fail' if fail_count > 0 else 'status-pass' }}">{{ 'At Risk' if fail_count > 0 else 'Pass' }}</span></td>
+                <td>JWT alg=none and admin path access tested</td>
+            </tr>
+            <tr>
+                <td><strong>A09</strong> — Logging Failures</td>
+                <td><span class="status-badge status-na">N/A</span></td>
+                <td>Out of scope for automated scan</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- ─────────────────────────────────────────
+     SECTION 4 — SCORING & DECISION
+     ───────────────────────────────────────── -->
+<div class="section-header" style="margin-top: 40px;">
+    <span class="section-num">SECTION 04</span>
+    <div class="section-title">Scoring &amp; Final Decision</div>
+</div>
+
+<div class="score-table-wrap">
+    <table class="stable">
+        <thead>
+            <tr>
+                <th style="width:50%">Control / Finding</th>
+                <th style="width:12%">Score</th>
+                <th style="width:22%">Visual</th>
+                <th style="width:16%">Grade</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% if scores %}
+            {% for s in scores %}
+            <tr>
+                <td style="color: var(--ink-soft);">{{ s.name }}</td>
+                <td style="font-family: var(--mono); font-weight: 700;">{{ s.score }}/10</td>
+                <td>
+                    <div class="mini-bar-wrap">
+                        <div class="mini-bar {{ 'bar-high' if s.score >= 7 else ('bar-mid' if s.score >= 4 else 'bar-low') }}"
+                             style="width: {{ s.score * 10 }}%;"></div>
+                    </div>
+                </td>
+                <td>
+                    {% if s.score >= 7 %}
+                        <span class="chip chip-pass">Good</span>
+                    {% elif s.score >= 4 %}
+                        <span class="chip chip-warn">Fair</span>
+                    {% else %}
+                        <span class="chip chip-fail">Poor</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        {% else %}
+            <tr><td colspan="4" class="empty-state">No scoring data available</td></tr>
+        {% endif %}
+        </tbody>
+    </table>
+</div>
+
+<div class="score-section">
+    <div class="score-label-row">
+        <span class="slabel">Final Security Score</span>
+        <span class="svalue" style="font-size: 15px; font-weight: 700; color: var(--ink);">
+            {{ score }} / {{ max_score }} pts &nbsp;·&nbsp; {{ score_pct }}%
+        </span>
+    </div>
+    <div class="score-track">
+        <div class="score-fill" style="width: {{ [score_pct, 100]|min }}%;"></div>
+    </div>
+    <div style="margin-top: 14px; display: flex; align-items: center; gap: 16px;">
+        <div class="verdict-badge {{ 'approved' if decision == 'Approved' else 'rejected' }}"
+             style="font-family: var(--cond); font-size: 16px; font-weight: 800; text-transform: uppercase;
+                    letter-spacing: 2px; padding: 8px 22px; border-radius: 4px;
+                    background: {{ '#2e7d32' if decision == 'Approved' else '#c62828' }}; color: #fff;">
+            {{ decision }}
+        </div>
+        <span style="color: var(--ink-mute); font-size: 11.5px;">
+            {% if decision == 'Approved' %}
+                System meets minimum security threshold for deployment.
+            {% else %}
+                System does NOT meet the minimum security threshold. Remediate all High/Critical findings before go-live.
+            {% endif %}
+        </span>
+    </div>
+</div>
+
+<div class="conditions-box">
+    <h4>⚠ Conditions to Go-Live</h4>
+    <ol>
+        {% for c in conditions %}
+        <li>{{ c }}</li>
+        {% endfor %}
+    </ol>
+</div>
+
+</div><!-- /report-body -->
+
+<!-- =============================================
+     FOOTER
+     ============================================= -->
+<div class="report-footer">
+    <div class="footer-left">
+        Auto Pentest Tool &nbsp;·&nbsp; Powered by OWASP ZAP · Nuclei · Nikto<br>
+        Report generated: {{ date }}<br>
+        Target: {{ target }}
+    </div>
+    <div style="text-align:center;">
+        <div class="confidential-stamp">Confidential</div>
+    </div>
+    <div class="footer-right">
+        Tools: ZAP · Nuclei · Nikto<br>
+        Framework: OWASP Top 10 · PCI DSS v4.0<br>
+        Total findings: {{ pass_count + warn_count + fail_count }}
+    </div>
+</div>
+
+</body>
+</html>
